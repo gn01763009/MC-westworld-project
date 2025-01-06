@@ -1,6 +1,8 @@
 import { createBot } from "mineflayer";
 import { Movements, goals } from "mineflayer-pathfinder";
-import { mineItems } from "./miningItems";
+import { mineItems } from "./commands/miningItems";
+import { tossItem } from "./commands/giveItems";
+import { findAndGoPlayer } from "./commands/findItems";
 
 var isStop = false;
 
@@ -39,6 +41,25 @@ bot.on("spawn", () => {
 
 // 挖掘指定的方塊
 function startListening() {
+  bot.on("chat", (username, message) => {
+    if (username === bot.username) return;
+
+    const match = message.match(/^give (\w+) (\d+)$/);
+    if (match) {
+      const itemName = match[1];
+      const quantity = parseInt(match[2], 10);
+
+      // 檢查物品是否存在於背包中
+      const item = bot.inventory.items().find((i) => i.name === itemName);
+      if (item) {
+        findAndGoPlayer(username);
+        tossItem(item, quantity);
+      } else {
+        bot.chat(`抱歉，我沒有 ${itemName}。`);
+      }
+    }
+  });
+
   bot.on("chat", (username, message) => {
     if (username === bot.username) return;
 
@@ -120,19 +141,11 @@ function startListening() {
     if (username === bot.username) return;
 
     if (message === "come here") {
-      const player = bot.players[username];
-      if (player && player.entity) {
-        const target = player.entity;
-        bot.pathfinder.setGoal(new goals.GoalFollow(target, 1));
-        bot.chat("我來了！");
-      } else {
-        bot.chat("找不到玩家。");
-      }
+      findAndGoPlayer(username);
     }
   });
 }
 
-// 錯誤處理
 bot.on("error", (err) => {
   console.error(`發生錯誤: ${err.message}`);
 });

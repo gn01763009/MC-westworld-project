@@ -1,5 +1,5 @@
 import { goals } from "mineflayer-pathfinder";
-import { bot, checkStop, useIsStop } from "./MiningBot";
+import { bot, checkStop, useIsStop } from "../MiningBot";
 import { findNearestBlock, howManyOfItem } from "./findItems";
 
 // 挖掘方塊
